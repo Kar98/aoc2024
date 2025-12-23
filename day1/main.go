@@ -1,21 +1,18 @@
 package day1
 
 import (
+	_ "embed"
 	"fmt"
 	"log/slog"
-	"os"
 	"slices"
 	"strconv"
 	"strings"
 )
 
-func main() {
-	fileData, err := os.ReadFile("input.txt")
-	if err != nil {
-		slog.Error("error", "e", err.Error())
-		return
-	}
-	file := string(fileData)
+//go:embed input.txt
+var file string
+
+func Main() {
 	lines := strings.Split(file, "\n")
 	var left []int
 	var right []int

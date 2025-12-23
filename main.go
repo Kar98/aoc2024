@@ -1,7 +1,11 @@
 package main
 
-import "fmt"
+import (
+	"aoc/day2"
+	"fmt"
+)
 
 func main() {
-	fmt.Println("run main")
+	output := day2.Main()
+	fmt.Println(output)
 }
