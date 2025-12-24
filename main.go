@@ -6,6 +6,6 @@ import (
 )
 
 func main() {
-	output := day2.Main()
+	output := day2.Main(1)
 	fmt.Println(output)
 }

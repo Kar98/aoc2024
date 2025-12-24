@@ -54,30 +54,69 @@ func validDecrementing(report []int64) bool {
 	return true
 }
 
-func ValidReport(report []int64) bool {
-	if validIncrementing(report) {
-		return true
+func validIncrementing2(report []int64) (bool, int) {
+	// 1 3 2 4 5 = safe
+	unsafeFound := false
+	currNum := report[0]
+	for i := 1; i < len(report); i++ {
+		if (currNum >= report[i] || (report[i]-currNum > 3)) && unsafeFound {
+			return false, i
+		}
+		if currNum >= report[i] || (report[i]-currNum > 3) {
+			unsafeFound = true
+		}
+		currNum = report[i]
 	}
-	return validDecrementing(report)
+	return true, 0
 }
 
-func Main() int {
+func validDecrementing2(report []int64) bool {
+	// 7 6 4 2 1
+	unsafeFound := false
+	currNum := report[0]
+	for i := 1; i < len(report); i++ {
+		if (currNum <= report[i] || (currNum-report[i] > 3)) && unsafeFound {
+			return false
+		}
+		if currNum <= report[i] || (currNum-report[i] > 3) {
+			return false
+		}
+		currNum = report[i]
+	}
+	return true
+}
+
+func ValidReport(report []int64, version int) bool {
+	if version == 1 {
+		if validIncrementing(report) {
+			return true
+		}
+		return validDecrementing(report)
+	}
+	valid, _ := validIncrementing2(report)
+	if valid {
+		return true
+	}
+	return validDecrementing2(report)
+}
+
+func Main(version int) int {
 	validReports := 0
 	reports := strings.SplitSeq(input, "\n")
 	for report := range reports {
-		if ValidReport(ToNums(report)) {
+		if ValidReport(ToNums(report), version) {
 			validReports++
 		}
 	}
 	return validReports
 }
 
-func Example() int {
+func Example(version int) int {
 	validReports := 0
 	reports := strings.SplitSeq(example, "\n")
 	for report := range reports {
 		numReport := ToNums(report)
-		if ValidReport(numReport) {
+		if ValidReport(numReport, version) {
 			validReports++
 		}
 
