@@ -55,49 +55,72 @@ func validDecrementing(report []int64) bool {
 }
 
 func validIncrementing2(report []int64) (bool, int) {
-	// 1 3 2 4 5 = safe
-	unsafeFound := false
 	currNum := report[0]
 	for i := 1; i < len(report); i++ {
-		if (currNum >= report[i] || (report[i]-currNum > 3)) && unsafeFound {
-			return false, i
-		}
 		if currNum >= report[i] || (report[i]-currNum > 3) {
-			unsafeFound = true
+			return false, i - 1
 		}
 		currNum = report[i]
 	}
 	return true, 0
 }
 
-func validDecrementing2(report []int64) bool {
+func validDecrementing2(report []int64) (bool, int) {
 	// 7 6 4 2 1
-	unsafeFound := false
 	currNum := report[0]
 	for i := 1; i < len(report); i++ {
-		if (currNum <= report[i] || (currNum-report[i] > 3)) && unsafeFound {
-			return false
-		}
 		if currNum <= report[i] || (currNum-report[i] > 3) {
-			return false
+			return false, i - 1
 		}
 		currNum = report[i]
 	}
-	return true
+	return true, 0
 }
 
 func ValidReport(report []int64, version int) bool {
+	maxLen := len(report) - 1
+	if report[0] == report[maxLen] {
+		return false
+	}
 	if version == 1 {
 		if validIncrementing(report) {
 			return true
 		}
 		return validDecrementing(report)
 	}
-	valid, _ := validIncrementing2(report)
-	if valid {
-		return true
+	// Figure out which direction it should be going.
+	diff := report[0] - report[maxLen]
+	if diff < 0 {
+		valid := validIncrementing(report)
+		// If not valid, iterate through where a level is removed
+		if !valid {
+			for i := range report {
+				tmpReport := make([]int64, 0)
+				tmpReport = append(tmpReport, report[:i]...)
+				tmpReport = append(tmpReport, report[i+1:]...)
+				valid := validIncrementing(tmpReport)
+				if valid {
+					return true
+				}
+			}
+		}
+		return valid
 	}
-	return validDecrementing2(report)
+
+	valid := validDecrementing(report)
+	// If not valid, iterate through where a level is removed
+	if !valid {
+		for i := range report {
+			tmpReport := make([]int64, 0)
+			tmpReport = append(tmpReport, report[:i]...)
+			tmpReport = append(tmpReport, report[i+1:]...)
+			valid := validDecrementing(tmpReport)
+			if valid {
+				return true
+			}
+		}
+	}
+	return valid
 }
 
 func Main(version int) int {
@@ -123,3 +146,7 @@ func Example(version int) int {
 	}
 	return validReports
 }
+
+// 446 is too low
+
+// 459 is answer

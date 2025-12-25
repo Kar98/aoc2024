@@ -38,5 +38,15 @@ func TestSafeReportsV2(t *testing.T) {
 			t.Errorf("%s should be true", report)
 		}
 	}
+}
 
+func TestSubset(t *testing.T) {
+	reports := []string{"21 24 25 28 32"} // all should be safe
+	for _, report := range reports {
+		rep := ToNums(report)
+		isValidReport := ValidReport(rep, 2)
+		if !isValidReport {
+			t.Errorf("%s should be true", report)
+		}
+	}
 }
