@@ -14,6 +14,9 @@ var input string
 //go:embed example.txt
 var example string
 
+//go:embed example2.txt
+var example2 string
+
 var validChars = []string{"m", "u", "l", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ",", "(", ")"}
 
 func isValid(char string) bool {
@@ -22,39 +25,82 @@ func isValid(char string) bool {
 
 func StartBuffering(inputData string) []string {
 	validBuff := false
-	operations := []string{}
-	buffer := ""
+	operations := &[]string{}
+	var buffer *string
 	strData := strings.SplitSeq(inputData, "")
 
 	for char := range strData {
-		if char == "m" {
-			buffer = ""
-			validBuff = true
-		}
-		validBuff = validBuff && isValid(char)
-		if !validBuff {
-			buffer = ""
-			continue
-		}
-		buffer += char
-		if len(buffer) == 4 {
-			if buffer != "mul(" {
-				validBuff = false
-			}
-		}
-		if char == ")" {
-			if !strings.Contains(buffer, ",") {
-				buffer = ""
-				continue
-			}
-			if len(buffer) > 7 {
-				operations = append(operations, buffer)
-				buffer = ""
-			}
-		}
+		buffer, validBuff = updateBuffer(char, buffer, validBuff, operations)
 	}
 
-	return operations
+	return *operations
+}
+
+func BufferingWithDoDont(inputData string) []string {
+	operations := &[]string{}
+
+	active := true
+	var buffer *string
+	validBuffer := true
+
+	array := strings.Split(inputData, "")
+	for i := 0; i < len(array); i++ {
+		char := array[i]
+		if char == "d" {
+			do := strings.Join(array[i:i+4], "")
+			dont := strings.Join(array[i:i+7], "")
+
+			if do == "do()" {
+				active = true
+				i += 3
+				continue
+			}
+
+			if dont == "don't()" {
+				active = false
+				i += 6
+				continue
+			}
+		}
+
+		if !active {
+			continue
+		}
+
+		buffer, validBuffer = updateBuffer(char, buffer, validBuffer, operations)
+	}
+
+	return *operations
+}
+
+func updateBuffer(char string, buffer *string, validBuff bool, operations *[]string) (*string, bool) {
+	emptyStr := new(string)
+	if char == "m" {
+		buffer = emptyStr
+		validBuff = true
+	}
+	validBuff = validBuff && isValid(char)
+	if !validBuff {
+		buffer = emptyStr
+		return buffer, validBuff
+	}
+	*buffer += char
+	if len(*buffer) == 4 {
+		if *buffer != "mul(" {
+			validBuff = false
+		}
+	}
+	if char == ")" {
+		if !strings.Contains(*buffer, ",") {
+			buffer = emptyStr
+			return buffer, validBuff
+		}
+		if len(*buffer) > 7 {
+			*operations = append(*operations, *buffer)
+			buffer = emptyStr
+		}
+	}
+	return buffer, validBuff
 }
 
 func calculateOperations(operations []string) (int, error) {
@@ -87,7 +133,12 @@ func calculateOperations(operations []string) (int, error) {
 }
 
 func Example(puzzle int) int {
-	operations := StartBuffering(example)
+	var operations []string
+	if puzzle == 1 {
+		operations = StartBuffering(example)
+	} else {
+		operations = StartBuffering(example2)
+	}
 
 	fmt.Println(operations)
 
@@ -100,9 +151,12 @@ func Example(puzzle int) int {
 }
 
 func Main(puzzle int) int {
-	operations := StartBuffering(input)
-
-	fmt.Println(operations)
+	var operations []string
+	if puzzle == 1 {
+		operations = StartBuffering(input)
+	} else {
+		operations = BufferingWithDoDont(input)
+	}
 
 	total, err := calculateOperations(operations)
 	if err != nil {
