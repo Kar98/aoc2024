@@ -13,13 +13,14 @@ var example string
 var input string
 
 func Main(puzzle int) int {
-	if puzzle == 1 {
-		inputData := scanner.FileToInput(input)
-		scans := scanner.NewScanner(inputData)
+	inputData := scanner.FileToInput(input)
 
+	if puzzle == 1 {
+		scans := scanner.NewScanner(inputData)
 		return scans.ScanForXmas(0, len(inputData)-1)
 	}
-	return 0
+	scans := scanner.NewScannerV2(inputData)
+	return scans.Scan()
 }
 
 // Quick and dirty hardcode to see how much faster with goroutines

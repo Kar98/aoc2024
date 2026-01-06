@@ -2,7 +2,6 @@ package scanner
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 )
 
@@ -18,18 +17,6 @@ func FileToInput(input string) [][]string {
 		output = append(output, strings.Split(line, ""))
 	}
 	return output
-}
-
-func Main(_ int) int {
-	input := [][]string{{"1", "2", "3"}, {"4", "5", "6"}}
-	fmt.Println(input[0])
-	fmt.Println(input[1])
-	fmt.Println(input[1][2])
-	return 0
-}
-
-func Example() {
-
 }
 
 func NewScanner(input [][]string) Scanner {
@@ -96,10 +83,6 @@ func (s *Scanner) ScanForXmas(startingRow int, finishRow int) int {
 		}
 	}
 	return xmasCount
-}
-
-func (s *Scanner) ScanForMasInX(startingRow int) int {
-	return 0
 }
 
 func (s *Scanner) Up(r int, c int) (string, error) {
