@@ -13,8 +13,9 @@ var input string
 
 func Main(puzzle int) int {
 	if puzzle == 1 {
-		scans := scanner.NewScanner(scanner.FileToInput(input))
-		return scans.Scan(0)
+		inputData := scanner.FileToInput(input)
+		scans := scanner.NewScanner(inputData)
+		return scans.ScanForXmas(0, len(inputData)-1)
 	}
 	return 0
 }

@@ -51,11 +51,10 @@ type BoundingBox struct {
 	bBox int // Bottom
 }
 
-func (s *Scanner) Scan(startingRow int) int {
+func (s *Scanner) ScanForXmas(startingRow int, finishRow int) int {
 	xmasCount := 0
 
-	// Cursor scans through the input and will check each orthoganal direction
-	for r := startingRow; r < len(s.input); r++ {
+	for r := startingRow; r <= finishRow; r++ {
 		for c := 0; c < len(s.input[r]); c++ {
 			// Check top
 			out, err := s.Up(r, c)
@@ -97,6 +96,10 @@ func (s *Scanner) Scan(startingRow int) int {
 		}
 	}
 	return xmasCount
+}
+
+func (s *Scanner) ScanForMasInX(startingRow int) int {
+	return 0
 }
 
 func (s *Scanner) Up(r int, c int) (string, error) {

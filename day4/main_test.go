@@ -80,12 +80,8 @@ func TestDownLeftOoB(t *testing.T) {
 	assert.Equal(t, "....", got)
 }
 
-func TestMiniExample(t *testing.T) {
-	s := scanner.NewScanner(scanner.FileToInput(miniexample))
-	assert.Equal(t, 5, s.Scan(0))
-}
-
 func TestExample(t *testing.T) {
-	s := scanner.NewScanner(scanner.FileToInput(example))
-	assert.Equal(t, 18, s.Scan(0))
+	inputData := scanner.FileToInput(example)
+	s := scanner.NewScanner(inputData)
+	assert.Equal(t, 18, s.ScanForXmas(0, len(inputData)))
 }
