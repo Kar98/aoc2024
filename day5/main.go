@@ -2,6 +2,7 @@ package day5
 
 import (
 	_ "embed"
+	"errors"
 	"fmt"
 	"slices"
 	"strconv"
@@ -43,31 +44,26 @@ func FileToInput(input string) Puzzle {
 }
 
 func Example(part int) int {
+	puzzleData := FileToInput(example)
 	if part == 1 {
-		puzzleData := FileToInput(example)
-		total, _ := solvePuzzle(puzzleData)
+		total, _ := solvePuzzlePart1(puzzleData)
 		return total
 	} else {
-		return 0
+		return solvePuzzlePart2(puzzleData)
 	}
 }
 
 func Main(part int) int {
-
-	// 47 must be before all the numbers on the right
-	// all numbers in the rule, must not be found before the RuleNumber
-	// If pages meet the conditions, then grab the middle number and add it to the tally
-
+	puzzleData := FileToInput(input)
 	if part == 1 {
-		puzzleData := FileToInput(input)
-		total, _ := solvePuzzle(puzzleData)
+		total, _ := solvePuzzlePart1(puzzleData)
 		return total
 	} else {
-		return 0
+		return solvePuzzlePart2(puzzleData)
 	}
 }
 
-func solvePuzzle(puzzle Puzzle) (int, []string) {
+func solvePuzzlePart1(puzzle Puzzle) (int, []string) {
 	total := 0
 	validPages := []string{}
 	for _, page := range puzzle.pages {
@@ -82,6 +78,102 @@ func solvePuzzle(puzzle Puzzle) (int, []string) {
 		}
 	}
 	return total, validPages
+}
+
+func solvePuzzlePart2(puzzle Puzzle) int {
+	total := 0
+	pagesToSort := []string{}
+	for _, page := range puzzle.pages {
+		isValid, _, err := IsValidPage(page, puzzle.rules)
+		if err != nil {
+			fmt.Println(err.Error())
+			return total
+		}
+		// Only count the incorrect added pages
+		if !isValid {
+			pagesToSort = append(pagesToSort, page)
+		}
+	}
+
+	for _, page := range pagesToSort {
+		pageNums := strings.Split(page, ",")
+		SortPage(pageNums, puzzle.rules)
+		middleIdx := len(pageNums) / 2
+		parsedInt, err := strconv.ParseInt(pageNums[middleIdx], 10, 32)
+		if err != nil {
+			fmt.Println(err.Error())
+			return total
+		}
+		total += int(parsedInt)
+	}
+
+	return total
+}
+
+func moveInSlice(s []string, fromIdx int, toIdx int) ([]string, error) {
+	if fromIdx <= toIdx {
+		return []string{}, errors.New("attempting to copy forwards")
+	}
+	newSlice := make([]string, len(s))
+	copy(newSlice, s)
+	tmpVal := s[fromIdx]
+	if toIdx == 0 {
+		newSlice = slices.Delete(newSlice, fromIdx, fromIdx+1)
+		return slices.Insert(newSlice, 0, tmpVal), nil
+	}
+	for i := fromIdx; i >= toIdx; i-- {
+		newSlice[i] = newSlice[i-1]
+	}
+	newSlice[toIdx] = tmpVal
+	return newSlice, nil
+}
+
+func editSlice(s []string, fromIdx int, toIdx int) ([]string, error) {
+	if fromIdx <= toIdx {
+		return []string{}, errors.New("attempting to copy forwards")
+	}
+	tmpVal := s[fromIdx]
+	if toIdx == 0 {
+		s = slices.Delete(s, fromIdx, fromIdx+1)
+		return slices.Insert(s, 0, tmpVal), nil
+	}
+	for i := fromIdx; i >= toIdx; i-- {
+		s[i] = s[i-1]
+	}
+	s[toIdx] = tmpVal
+	return s, nil
+}
+
+func SortPage(pageNums []string, rules map[string][]string) []string {
+	for i := 0; i < len(pageNums); i++ {
+		pageNum := pageNums[i]
+		rule, ok := rules[pageNum]
+		// If no rule exists, then we don't need to check
+		if !ok {
+			continue
+		}
+		// Go through every number in the rule, and ensure that all previous indexs do not match a rule number.
+		// If a rule number is matched, then place the current index before the matched number.
+		previousIndexes := pageNums[0:i]
+		for _, ruleNum := range rule {
+			found, at := ruleInPreviousNums(previousIndexes, ruleNum)
+			if found {
+				editSlice(pageNums, i, at)
+				return SortPage(pageNums, rules)
+			}
+		}
+	}
+
+	return pageNums
+}
+
+func ruleInPreviousNums(previousNums []string, ruleNum string) (bool, int) {
+	for i, prevNum := range previousNums {
+		if prevNum == ruleNum {
+			return true, i
+		}
+	}
+	return false, -1
 }
 
 func IsValidPage(page string, rules map[string][]string) (bool, int, error) {
