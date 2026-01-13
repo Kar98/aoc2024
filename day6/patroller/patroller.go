@@ -7,6 +7,12 @@ import (
 
 type Direction string
 
+// RowColumn
+type RC struct {
+	R int
+	C int
+}
+
 const (
 	Up    Direction = "u"
 	Down  Direction = "d"
@@ -17,13 +23,16 @@ const (
 var (
 	ErrObstacle = errors.New("obstacle")
 	ErrEnd      = errors.New("end")
+	ErrLoop     = errors.New("stuck in loop")
 )
 
 type Patroller struct {
 	labArea   [][]string
 	direction Direction
 	r         int // row
+	startingR int
 	c         int // coloumn
+	startingC int
 	walk      func() error
 }
 
@@ -50,12 +59,21 @@ func startPoint(input [][]string) (int, int) {
 }
 
 func NewPatroller(puzzleInput [][]string) Patroller {
-	r, c := startPoint(puzzleInput)
+	var labArea [][]string
+	labArea = make([][]string, len(puzzleInput))
+	for i := range puzzleInput {
+		labArea[i] = make([]string, len(puzzleInput[i]))
+		copy(labArea[i], puzzleInput[i])
+	}
+
+	r, c := startPoint(labArea)
 	return Patroller{
-		labArea:   puzzleInput,
+		labArea:   labArea,
 		direction: Up,
 		r:         r,
 		c:         c,
+		startingR: r,
+		startingC: c,
 	}
 }
 
@@ -63,7 +81,11 @@ func (p *Patroller) CurrentPosition() (int, int) {
 	return p.r, p.c
 }
 
-func (p *Patroller) WalkUp() error {
+func (p *Patroller) GetLabArea() [][]string {
+	return p.labArea
+}
+
+func (p *Patroller) walkUp() error {
 	if p.r-1 < 0 {
 		return ErrEnd
 	}
@@ -77,7 +99,7 @@ func (p *Patroller) WalkUp() error {
 	return nil
 }
 
-func (p *Patroller) WalkDown() error {
+func (p *Patroller) walkDown() error {
 	if p.r+1 >= len(p.labArea) {
 		return ErrEnd
 	}
@@ -90,7 +112,7 @@ func (p *Patroller) WalkDown() error {
 
 	return nil
 }
-func (p *Patroller) WalkRight() error {
+func (p *Patroller) walkRight() error {
 	if p.c+1 >= len(p.labArea[0]) {
 		return ErrEnd
 	}
@@ -103,7 +125,7 @@ func (p *Patroller) WalkRight() error {
 
 	return nil
 }
-func (p *Patroller) WalkLeft() error {
+func (p *Patroller) walkLeft() error {
 	if p.c-1 < 0 {
 		return ErrEnd
 	}
@@ -119,35 +141,35 @@ func (p *Patroller) WalkLeft() error {
 
 func (p *Patroller) getWalkFunc() func() error {
 	if p.direction == Up {
-		return p.WalkUp
+		return p.walkUp
 	}
 	if p.direction == Down {
-		return p.WalkDown
+		return p.walkDown
 	}
 	if p.direction == Right {
-		return p.WalkRight
+		return p.walkRight
 	}
 	if p.direction == Left {
-		return p.WalkLeft
+		return p.walkLeft
 	}
-	return p.WalkUp
+	return p.walkUp
 }
 
 func (p *Patroller) changeDirection() (Direction, error) {
 	if p.direction == Up {
-		p.walk = p.WalkRight
+		p.walk = p.walkRight
 		return Right, nil
 	}
 	if p.direction == Right {
-		p.walk = p.WalkDown
+		p.walk = p.walkDown
 		return Down, nil
 	}
 	if p.direction == Down {
-		p.walk = p.WalkLeft
+		p.walk = p.walkLeft
 		return Left, nil
 	}
 	if p.direction == Left {
-		p.walk = p.WalkUp
+		p.walk = p.walkUp
 		return Up, nil
 	}
 	return "", errors.New("unknown direction change")
@@ -165,6 +187,26 @@ func (p *Patroller) countVisitedTiles() int {
 	return total
 }
 
+func (p *Patroller) GetXPositions() []RC {
+	output := []RC{}
+	for r := range p.labArea {
+		for c := range p.labArea[r] {
+			// Dont count the starting position as we don't want to put an obstacle there.
+			if p.startingC == c && p.startingR == r {
+				continue
+			}
+			if p.labArea[r][c] == "X" {
+				output = append(output, RC{R: r, C: c})
+			}
+		}
+	}
+	return output
+}
+
+func (p *Patroller) AddObstacle(rc RC) {
+	p.labArea[rc.R][rc.C] = "#"
+}
+
 func (p *Patroller) GoWalking() (int, error) {
 	failSafe := 0
 	// Get current direction
@@ -178,8 +220,8 @@ func (p *Patroller) GoWalking() (int, error) {
 
 	var walkErr error
 	for walkErr != ErrEnd {
-		if failSafe > 100000 {
-			return 0, errors.New("exceeded failsafe threshold")
+		if failSafe > 10000 {
+			return 0, ErrLoop
 		}
 		failSafe++
 
