@@ -3,6 +3,7 @@ package day7
 import (
 	_ "embed"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 )
@@ -58,7 +59,6 @@ func isValidOperation(nums []int64) bool {
 	operators := generateOperators(rightSideNumbers)
 	for _, listOfSymbols := range operators {
 		runningTotal := rightSideNumbers[0]
-		// listOfSymbols = x + x
 		for i := 0; i < len(rightSideNumbers)-1; i++ {
 			if string(listOfSymbols[i]) == "0" {
 				runningTotal *= rightSideNumbers[i+1]
@@ -76,18 +76,13 @@ func isValidOperation(nums []int64) bool {
 
 func generateOperators(nums []int64) []string {
 	// n^2 - 1
-	if len(nums) == 2 {
-		return []string{"0", "1"}
-	}
-	if len(nums) == 3 {
-		return []string{"00", "01", "10", "11"}
-	}
-	n := len(nums) - 1
-	totalOperators := n*n - 1
+	l := len(nums) - 1
+	totalOperators := math.Pow(float64(2), float64(l))
 	operators := []string{}
-	for i := range totalOperators {
+
+	for i := range int(totalOperators) {
 		asBin := fmt.Sprintf("%b", i)
-		operators = append(operators, pad(asBin, n))
+		operators = append(operators, pad(asBin, l))
 	}
 
 	return operators

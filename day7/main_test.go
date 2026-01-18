@@ -38,6 +38,10 @@ func TestGenerateOperators(t *testing.T) {
 	assert.Equal(t, []string{"0", "1"}, generateOperators([]int64{10, 19}))
 	assert.Equal(t, []string{"00", "01", "10", "11"}, generateOperators([]int64{81, 40, 27}))
 	assert.Equal(t, []string{"000", "001", "010", "011", "100", "101", "110", "111"}, generateOperators([]int64{81, 40, 27, 10}))
+	operators := generateOperators([]int64{100058717, 58, 44, 628, 7, 145, 31, 9, 8})
+	assert.Contains(t, operators, "00111110")
+	assert.Contains(t, operators, "11111111")
+	t.Log(len(operators))
 }
 
 func TestPad(t *testing.T) {
@@ -63,4 +67,10 @@ func TestExample(t *testing.T) {
 	}
 
 	assert.Equal(t, int64(3749), total)
+}
+
+func TestMaunalValidation(t *testing.T) {
+	arr := []int64{100058717, 58, 44, 628, 7, 145, 31, 9, 8}
+	ops := generateOperators(arr)
+	t.Log(ops)
 }
