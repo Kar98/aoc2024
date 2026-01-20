@@ -32,6 +32,11 @@ func TestValidOperationsFunc(t *testing.T) {
 	assert.False(t, isValidOperation(result[2]))
 	assert.False(t, isValidOperation(result[3]))
 	assert.False(t, isValidOperation(result[4]))
+
+	// Check V2 conditions
+	assert.True(t, isValidOperationV2(result[3]))
+	assert.True(t, isValidOperationV2(result[4]))
+
 }
 
 func TestGenerateOperators(t *testing.T) {
@@ -69,8 +74,28 @@ func TestExample(t *testing.T) {
 	assert.Equal(t, int64(3749), total)
 }
 
+func TestExampleV2(t *testing.T) {
+	rows, err := FileToInput(example)
+	assert.NoError(t, err)
+
+	var total int64
+	for _, row := range rows {
+		if isValidOperationV2(row) {
+			total += row[0]
+		}
+	}
+
+	assert.Equal(t, int64(11387), total)
+}
+
 func TestMaunalValidation(t *testing.T) {
 	arr := []int64{100058717, 58, 44, 628, 7, 145, 31, 9, 8}
 	ops := generateOperators(arr)
 	t.Log(ops)
+}
+
+func TestMergeNumbers(t *testing.T) {
+	output, err := mergeNumbers(100, 10)
+	assert.NoError(t, err)
+	assert.Equal(t, int64(10010), output)
 }
