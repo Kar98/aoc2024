@@ -37,55 +37,31 @@ func FileToInput(file string) ([][]int64, error) {
 }
 
 func Main(part int) int64 {
+	var base int
 	rows, err := FileToInput(input)
 	if err != nil {
 		fmt.Println(err.Error())
 		return 0
 	}
 	if part == 1 {
-		var total int64
-		for _, row := range rows {
-			if isValidOperation(row) {
-				total += row[0]
-			}
-		}
-		return total
+		base = 2
+	} else {
+		base = 3
 	}
 
 	var total int64
 	for _, row := range rows {
-		if isValidOperationV2(row) {
+		if isValidOperation(row, base) {
 			total += row[0]
 		}
 	}
 	return total
 }
 
-func isValidOperation(nums []int64) bool {
+func isValidOperation(nums []int64, base int) bool {
 	main := nums[0]
 	rightSideNumbers := nums[1:]
-	operators := generateOperators(rightSideNumbers)
-	for _, listOfSymbols := range operators {
-		runningTotal := rightSideNumbers[0]
-		for i := 0; i < len(rightSideNumbers)-1; i++ {
-			if string(listOfSymbols[i]) == "0" {
-				runningTotal *= rightSideNumbers[i+1]
-			} else {
-				runningTotal += rightSideNumbers[i+1]
-			}
-		}
-		if main == runningTotal {
-			return true
-		}
-	}
-
-	return false
-}
-
-func isValidOperationV2(nums []int64) bool {
-	main := nums[0]
-	rightSideNumbers := nums[1:]
-	operators := generateOperatorsV2(rightSideNumbers)
+	operators := generateOperators(rightSideNumbers, base)
 	for _, listOfSymbols := range operators {
 		runningTotal := rightSideNumbers[0]
 		for i := 0; i < len(rightSideNumbers)-1; i++ {
@@ -114,43 +90,29 @@ func mergeNumbers(i1, i2 int64) (int64, error) {
 	return strconv.ParseInt(mergedStr, 10, 64)
 }
 
-func generateOperators(nums []int64) []string {
-	// n^2 - 1
-	l := len(nums) - 1
-	totalOperators := math.Pow(float64(2), float64(l))
-	operators := []string{}
-
-	for i := range int(totalOperators) {
-		asBin := fmt.Sprintf("%b", i)
-		operators = append(operators, pad(asBin, l))
-	}
-
-	return operators
-}
-
-func generateOperatorsV2(nums []int64) []string {
+func generateOperators(nums []int64, base int) []string {
 	setsOfOperators := len(nums) - 1
-	totalPatterns := int(math.Pow(float64(3), float64(setsOfOperators)))
+	totalPatterns := int(math.Pow(float64(base), float64(setsOfOperators)))
 
 	matrix := make([]string, totalPatterns)
 	for i := 0; i < totalPatterns; i++ {
-		matrix[i] = createSlice(i, setsOfOperators)
+		matrix[i] = createSlice(i, setsOfOperators, 2)
 	}
 
 	return matrix
 }
 
-func createSlice(i int, size int) string {
-	slice := make([]string, size)
-	for m := range size {
-		factor := int(math.Pow(float64(3), float64(size-1-m)))
-		slice[m] = get(i / factor)
+func createSlice(position int, totalColumns int, base int) string {
+	slice := make([]string, totalColumns)
+	for m := range totalColumns {
+		factor := int(math.Pow(float64(base), float64(totalColumns-1-m)))
+		slice[m] = get(position/factor, base)
 	}
 	return strings.Join(slice, "")
 }
 
-func get(i int) string {
-	idx := i % 3
+func get(i int, base int) string {
+	idx := i % base
 	return candidates[idx]
 }
 
