@@ -16,6 +16,8 @@ var input string
 
 var candidates = [3]string{"+", "x", "|"}
 
+var operatorMatrix map[int][]string
+
 func FileToInput(file string) ([][]int64, error) {
 	lines := strings.Split(file, "\n")
 	output := make([][]int64, len(lines))
@@ -38,6 +40,7 @@ func FileToInput(file string) ([][]int64, error) {
 
 func Main(part int) int64 {
 	var base int
+	operatorMatrix = make(map[int][]string)
 	rows, err := FileToInput(input)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -61,7 +64,7 @@ func Main(part int) int64 {
 func isValidOperation(nums []int64, base int) bool {
 	main := nums[0]
 	rightSideNumbers := nums[1:]
-	operators := generateOperators(rightSideNumbers, base)
+	operators := getOperators(rightSideNumbers, base)
 	for _, listOfSymbols := range operators {
 		runningTotal := rightSideNumbers[0]
 		for i := 0; i < len(rightSideNumbers)-1; i++ {
@@ -90,13 +93,24 @@ func mergeNumbers(i1, i2 int64) (int64, error) {
 	return strconv.ParseInt(mergedStr, 10, 64)
 }
 
+func getOperators(nums []int64, base int) []string {
+	lNums := len(nums)
+	res, ok := operatorMatrix[lNums]
+	if !ok {
+		operators := generateOperators(nums, base)
+		operatorMatrix[lNums] = operators
+		res = operators
+	}
+	return res
+}
+
 func generateOperators(nums []int64, base int) []string {
 	setsOfOperators := len(nums) - 1
 	totalPatterns := int(math.Pow(float64(base), float64(setsOfOperators)))
 
 	matrix := make([]string, totalPatterns)
 	for i := 0; i < totalPatterns; i++ {
-		matrix[i] = createSlice(i, setsOfOperators, 2)
+		matrix[i] = createSlice(i, setsOfOperators, base)
 	}
 
 	return matrix
@@ -114,29 +128,4 @@ func createSlice(position int, totalColumns int, base int) string {
 func get(i int, base int) string {
 	idx := i % base
 	return candidates[idx]
-}
-
-func pad(input string, maxPad int) string {
-	len := len(input)
-	if maxPad-len <= 0 {
-		return input
-	}
-	return strings.Repeat("0", maxPad-len) + input
-}
-
-func convertBinToOperators(binaryNumbers []string) []string {
-	operators := []string{}
-	for _, binNum := range binaryNumbers {
-		operator := ""
-		nums := strings.Split(binNum, "")
-		for _, num := range nums {
-			if num == "0" {
-				operator += "x"
-			} else {
-				operator += "+"
-			}
-		}
-		operators = append(operators, operator)
-	}
-	return operators
 }

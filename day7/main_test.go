@@ -37,8 +37,8 @@ func TestValidOperationsFunc(t *testing.T) {
 	// Check V2 conditions
 	base = 3
 	assert.True(t, isValidOperation(result[3], base))
+	assert.True(t, isValidOperation(result[3], base))
 	assert.True(t, isValidOperation(result[4], base))
-
 }
 
 func TestGenerateOperators(t *testing.T) {
@@ -48,17 +48,6 @@ func TestGenerateOperators(t *testing.T) {
 	operators := generateOperators([]int64{100058717, 58, 44, 628, 7, 145, 31, 9, 8}, 2)
 	assert.Contains(t, operators, "++xxxxx+")
 	assert.Contains(t, operators, "++++++++")
-}
-
-func TestPad(t *testing.T) {
-	assert.Equal(t, "0001", pad("1", 4))
-	assert.Equal(t, "0010", pad("0010", 4))
-	assert.Equal(t, "000100", pad("0100", 6))
-}
-
-func TestConvertBinToOperators(t *testing.T) {
-	res := convertBinToOperators([]string{"01001"})
-	assert.Equal(t, "x+xx+", res[0])
 }
 
 func TestExample(t *testing.T) {
@@ -88,12 +77,6 @@ func TestExampleV2(t *testing.T) {
 
 	assert.Equal(t, int64(11387), total)
 }
-
-// func TestMaunalValidation(t *testing.T) {
-// 	arr := []int64{100058717, 58, 44, 628, 7, 145, 31, 9, 8}
-// 	ops := generateOperators(arr, 2)
-// 	t.Log(ops)
-// }
 
 func TestMergeNumbers(t *testing.T) {
 	output, err := mergeNumbers(100, 10)
