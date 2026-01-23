@@ -22,6 +22,7 @@ func TestFileToInput(t *testing.T) {
 }
 
 func TestValidOperationsFunc(t *testing.T) {
+	operatorMatrix = make(map[int][]string)
 	result, err := FileToInput(example)
 	assert.NoError(t, err)
 
@@ -35,6 +36,7 @@ func TestValidOperationsFunc(t *testing.T) {
 	assert.False(t, isValidOperation(result[4], base))
 
 	// Check V2 conditions
+	operatorMatrix = make(map[int][]string)
 	base = 3
 	assert.True(t, isValidOperation(result[3], base))
 	assert.True(t, isValidOperation(result[3], base))

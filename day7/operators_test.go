@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCreateSlice(t *testing.T) {
-	slc := createSlice(10, 3, 3)
+func TestCreateOperatorStr(t *testing.T) {
+	slc := createOperatorStr(10, 3, 3)
 	assert.Equal(t, "x+x", slc)
 }

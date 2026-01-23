@@ -16,6 +16,7 @@ var input string
 
 var candidates = [3]string{"+", "x", "|"}
 
+// TODO : Set this up to be thread safe. Compare the time difference with single thread vs multi
 var operatorMatrix map[int][]string
 
 func FileToInput(file string) ([][]int64, error) {
@@ -110,13 +111,13 @@ func generateOperators(nums []int64, base int) []string {
 
 	matrix := make([]string, totalPatterns)
 	for i := 0; i < totalPatterns; i++ {
-		matrix[i] = createSlice(i, setsOfOperators, base)
+		matrix[i] = createOperatorStr(i, setsOfOperators, base)
 	}
 
 	return matrix
 }
 
-func createSlice(position int, totalColumns int, base int) string {
+func createOperatorStr(position int, totalColumns int, base int) string {
 	slice := make([]string, totalColumns)
 	for m := range totalColumns {
 		factor := int(math.Pow(float64(base), float64(totalColumns-1-m)))
