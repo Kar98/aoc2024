@@ -73,7 +73,7 @@ func (f *AntennaFinder) GetCoordinates(charToFind string) []Coordinate {
 	return coords
 }
 
-func (f *AntennaFinder) GetAntinodes(coords []Coordinate) []Coordinate {
+func (f *AntennaFinder) GetAntinodes(coords []Coordinate) {
 	for baseI := 0; baseI < len(coords); baseI++ {
 		baseCoord := coords[baseI]
 
@@ -90,7 +90,39 @@ func (f *AntennaFinder) GetAntinodes(coords []Coordinate) []Coordinate {
 			f.placeAntinode(baseCoord.r+(-1*rdiff), baseCoord.c+(-1*cdiff))
 		}
 	}
-	return []Coordinate{}
+}
+
+func (f *AntennaFinder) GetAntinodesByGrid(coords []Coordinate) {
+	for baseI := 0; baseI < len(coords); baseI++ {
+		baseCoord := coords[baseI]
+
+		for _, coord := range coords {
+			if baseCoord.r == coord.r && baseCoord.c == coord.c {
+				// Found same point, count yourself and end
+				f.placeAntinode(baseCoord.r, baseCoord.c)
+				continue
+			}
+			// place below
+			rdiff := coord.r - baseCoord.r // 2 - 1 =  1
+			cdiff := coord.c - baseCoord.c // 4 - 7 = -3
+			currentRDiff := 0
+			currentCDiff := 0
+			var err error
+			for err != ErrOutofBounds {
+				currentRDiff += rdiff
+				currentCDiff += cdiff
+				err = f.placeAntinode(coord.r+currentRDiff, coord.c+currentCDiff)
+			}
+			// place above
+			currentRDiff = 0
+			currentCDiff = 0
+			for err != ErrOutofBounds {
+				currentRDiff += rdiff
+				currentCDiff += cdiff
+				err = f.placeAntinode(baseCoord.r+(-1*currentRDiff), baseCoord.c+(-1*currentCDiff))
+			}
+		}
+	}
 }
 
 func (f *AntennaFinder) CountAntinodes() int {

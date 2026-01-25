@@ -11,14 +11,6 @@ import (
 //go:embed example.txt
 var example string
 
-func TestAntenna(t *testing.T) {
-	/*
-		For a given antenna,
-			get a list of coordinates of other same antennas
-			put the antinodes either side of the matching antennas
-	*/
-}
-
 func TestFileToInput(t *testing.T) {
 	res := antennafinder.FileToInput(example)
 	assert.Len(t, res, 12)
@@ -48,4 +40,14 @@ func TestAntinodePlacement(t *testing.T) {
 	afinder.GetAntinodes(coords2)
 	afinder.PrintAntinode()
 	assert.Equal(t, 14, afinder.CountAntinodes())
+}
+
+func TestAntinodeGridPlacement(t *testing.T) {
+	afinder := antennafinder.NewFinder(example)
+	coords1 := afinder.GetCoordinates("0")
+	coords2 := afinder.GetCoordinates("A")
+	afinder.GetAntinodesByGrid(coords1)
+	afinder.GetAntinodesByGrid(coords2)
+	afinder.PrintAntinode()
+	assert.Equal(t, 34, afinder.CountAntinodes())
 }

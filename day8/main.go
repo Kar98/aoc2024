@@ -14,9 +14,21 @@ func Main(puzzle int) int {
 		antennas := finder.GetAntennas()
 		for _, antenna := range antennas {
 			coords := finder.GetCoordinates(antenna)
+			if len(coords) == 1 {
+				continue // skip if only an antenna only has the 1 location
+			}
 			finder.GetAntinodes(coords)
 		}
 		return finder.CountAntinodes()
 	}
-	return 0
+	finder := antennafinder.NewFinder(input)
+	antennas := finder.GetAntennas()
+	for _, antenna := range antennas {
+		coords := finder.GetCoordinates(antenna)
+		if len(coords) == 1 {
+			continue // skip if only an antenna only has the 1 location
+		}
+		finder.GetAntinodesByGrid(coords)
+	}
+	return finder.CountAntinodes()
 }
