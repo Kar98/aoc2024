@@ -7,15 +7,27 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestStart(t *testing.T) {
-	/// 12345
-	// file, space, file, sapce, file
-
-	// 0..111....22222
-
+func TestBuilder(t *testing.T) {
 	builder := diskbuilder.NewDiskBuilder("12345")
 	err := builder.Build()
 	assert.NoError(t, err)
-	builder.PrintDisk()
+	out := builder.PrintDisk()
+	assert.Equal(t, "0..111....22222", out)
 
+	builder2 := diskbuilder.NewDiskBuilder("2333133121414131402")
+	err = builder2.Build()
+	assert.NoError(t, err)
+	out = builder2.PrintDisk()
+	assert.Equal(t, "00...111...2...333.44.5555.6666.777.888899", out)
+}
+
+func TestSorting(t *testing.T) {
+	builder := diskbuilder.NewDiskBuilder("2333133121414131402")
+	err := builder.Build()
+	assert.NoError(t, err)
+	builder.Sort()
+	out := builder.PrintDisk()
+	assert.Equal(t, "0099811188827773336446555566..............", out)
+	checksum := builder.CalculateChecksum()
+	assert.Equal(t, int64(1928), checksum)
 }
