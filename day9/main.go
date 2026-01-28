@@ -11,8 +11,8 @@ var input string
 
 func Main(puzzle int) int64 {
 	if puzzle == 1 {
-		builder := diskbuilder.NewDiskBuilder(input)
-		err := builder.Build()
+		builder := diskbuilder.NewSimpleDisk(input)
+		err := builder.BuildDisk()
 		if err != nil {
 			fmt.Println(err.Error())
 			return 0

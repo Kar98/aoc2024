@@ -11,19 +11,43 @@ type Disk struct {
 	disk          []FileBlock
 }
 
-type FileBlock struct {
-	ID    int64
-	value int64
+type SimpleDisk struct {
+	Disk
 }
 
-func NewDiskBuilder(startingBlock string) Disk {
-	return Disk{
-		startingBlock: startingBlock,
-		disk:          make([]FileBlock, 0),
+type ComplexDisk struct {
+	Disk
+}
+
+type FileBlock struct {
+	ID       int64
+	startPos int
+	length   int
+}
+
+func NewSimpleDisk(startingBlock string) SimpleDisk {
+	return SimpleDisk{
+		Disk{
+			startingBlock: startingBlock,
+			disk:          make([]FileBlock, 0),
+		},
 	}
 }
 
-func (d *Disk) Build() error {
+func NewComplexDisk(startingBlock string) ComplexDisk {
+	return ComplexDisk{
+		Disk{
+			startingBlock: startingBlock,
+			disk:          make([]FileBlock, 0),
+		},
+	}
+}
+
+func (d *ComplexDisk) BuildDisk() error {
+	return nil
+}
+
+func (d *SimpleDisk) BuildDisk() error {
 
 	file := true
 	currentId := int64(-1)
@@ -41,12 +65,12 @@ func (d *Disk) Build() error {
 		}
 		if file {
 			for range num {
-				block := FileBlock{ID: currentId, value: currentId}
+				block := FileBlock{ID: currentId}
 				d.disk = append(d.disk, block)
 			}
 		} else {
 			for range num {
-				block := FileBlock{ID: -1, value: -1}
+				block := FileBlock{ID: -1}
 				d.disk = append(d.disk, block)
 			}
 		}
@@ -59,33 +83,31 @@ func (d *Disk) Build() error {
 func (d *Disk) PrintDisk() string {
 	var output strings.Builder
 	for _, block := range d.disk {
-		if block.value == -1 {
+		if block.ID == -1 {
 			output.WriteString(".")
 		} else {
-			output.WriteString(fmt.Sprint(block.value))
+			output.WriteString(fmt.Sprint(block.ID))
 		}
 
 	}
 	return output.String()
 }
 
-func (d *Disk) Sort() {
+func (d *SimpleDisk) Sort() {
 	totalIterations := d.countEmptySpaces()
 	totalLen := len(d.disk) - 1
 
 	emptyIndex := 0
 	// Iterate thorugh the loop and grab the last value and put it into an empty space
 	for i := totalLen; i >= totalLen+1-totalIterations; i-- {
-		if d.disk[i].value == -1 {
+		if d.disk[i].ID == -1 {
 			continue
 		}
 		emptyIndex = d.getEmptyBlock(emptyIndex)
 		// Write to empty block
 		d.disk[emptyIndex].ID = d.disk[i].ID
-		d.disk[emptyIndex].value = d.disk[i].value
 		// Update source block to be empty
 		d.disk[i].ID = -1
-		d.disk[i].value = -1
 	}
 }
 
@@ -93,7 +115,7 @@ func (d *Disk) CalculateChecksum() int64 {
 	total := int64(0)
 	for i, r := range d.disk {
 		if d.disk[i].ID == -1 {
-			return total
+			continue
 		}
 		calc := int64(i) * r.ID
 		total += calc
@@ -101,7 +123,7 @@ func (d *Disk) CalculateChecksum() int64 {
 	return total
 }
 
-func (d *Disk) getEmptyBlock(fromIdx int) int {
+func (d *SimpleDisk) getEmptyBlock(fromIdx int) int {
 	for i := fromIdx; i < len(d.disk)-1; i++ {
 		if d.disk[i].ID == -1 {
 			return i
@@ -110,7 +132,7 @@ func (d *Disk) getEmptyBlock(fromIdx int) int {
 	return -1 // should cause a panic
 }
 
-func (d *Disk) countEmptySpaces() int {
+func (d *SimpleDisk) countEmptySpaces() int {
 	total := 0
 	for _, block := range d.disk {
 		if block.ID == -1 {
