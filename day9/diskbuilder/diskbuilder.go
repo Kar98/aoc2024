@@ -17,6 +17,7 @@ type SimpleDisk struct {
 
 type ComplexDisk struct {
 	Disk
+	lookup map[int64]FileBlock
 }
 
 type FileBlock struct {
@@ -36,14 +37,41 @@ func NewSimpleDisk(startingBlock string) SimpleDisk {
 
 func NewComplexDisk(startingBlock string) ComplexDisk {
 	return ComplexDisk{
-		Disk{
-			startingBlock: startingBlock,
-			disk:          make([]FileBlock, 0),
-		},
+		Disk: Disk{startingBlock: startingBlock,
+			disk: make([]FileBlock, 0)},
+		lookup: make(map[int64]FileBlock, 0),
 	}
 }
 
 func (d *ComplexDisk) BuildDisk() error {
+	file := true
+	currentId := int64(-1)
+	for i, char := range strings.Split(d.startingBlock, "") {
+		if file {
+			currentId++
+		}
+		if char == "0" {
+			file = !file
+			continue
+		}
+		num, err := strconv.ParseInt(char, 10, 64)
+		if err != nil {
+			return err
+		}
+		if file {
+			for range num {
+				block := FileBlock{ID: currentId}
+				d.lookup[currentId] = FileBlock{ID: currentId, startPos: i, length: int(num)}
+				d.disk = append(d.disk, block)
+			}
+		} else {
+			for range num {
+				block := FileBlock{ID: -1}
+				d.disk = append(d.disk, block)
+			}
+		}
+		file = !file
+	}
 	return nil
 }
 
@@ -110,6 +138,8 @@ func (d *SimpleDisk) Sort() {
 		d.disk[i].ID = -1
 	}
 }
+
+func (d *ComplexDisk) Sort()
 
 func (d *Disk) CalculateChecksum() int64 {
 	total := int64(0)
