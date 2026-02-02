@@ -20,6 +20,12 @@ func Main(puzzle int) int64 {
 		builder.Sort()
 		return builder.CalculateChecksum()
 	}
-
-	return 0
+	builder := diskbuilder.NewComplexDisk(input)
+	err := builder.BuildDisk()
+	if err != nil {
+		fmt.Println(err.Error())
+		return 0
+	}
+	builder.Sort()
+	return builder.CalculateChecksum()
 }

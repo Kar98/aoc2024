@@ -19,6 +19,12 @@ func TestBuilder(t *testing.T) {
 	assert.NoError(t, err)
 	out = builder2.PrintDisk()
 	assert.Equal(t, "00...111...2...333.44.5555.6666.777.888899", out)
+
+	cbuilder := diskbuilder.NewComplexDisk("2333133121414131402")
+	err = cbuilder.BuildDisk()
+	assert.NoError(t, err)
+	out = cbuilder.PrintDisk()
+	assert.Equal(t, "00...111...2...333.44.5555.6666.777.888899", out)
 }
 
 func TestSorting(t *testing.T) {
@@ -30,4 +36,14 @@ func TestSorting(t *testing.T) {
 	assert.Equal(t, "0099811188827773336446555566..............", out)
 	checksum := builder.CalculateChecksum()
 	assert.Equal(t, int64(1928), checksum)
+}
+
+func TestSortingComplex(t *testing.T) {
+	builder := diskbuilder.NewComplexDisk("2333133121414131402")
+	err := builder.BuildDisk()
+	assert.NoError(t, err)
+	builder.Sort()
+	out := builder.PrintDisk()
+	assert.Equal(t, "00992111777.44.333....5555.6666.....8888..", out)
+	assert.Equal(t, int64(2858), builder.CalculateChecksum())
 }

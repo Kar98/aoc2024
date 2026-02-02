@@ -1,6 +1,7 @@
 package diskbuilder
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -17,13 +18,13 @@ type SimpleDisk struct {
 
 type ComplexDisk struct {
 	Disk
-	lookup map[int64]FileBlock
+	lookup map[int]FileBlock
 }
 
 type FileBlock struct {
-	ID       int64
+	ID       int
 	startPos int
-	length   int
+	size     int
 }
 
 func NewSimpleDisk(startingBlock string) SimpleDisk {
@@ -39,14 +40,15 @@ func NewComplexDisk(startingBlock string) ComplexDisk {
 	return ComplexDisk{
 		Disk: Disk{startingBlock: startingBlock,
 			disk: make([]FileBlock, 0)},
-		lookup: make(map[int64]FileBlock, 0),
+		lookup: make(map[int]FileBlock, 0),
 	}
 }
 
 func (d *ComplexDisk) BuildDisk() error {
 	file := true
-	currentId := int64(-1)
-	for i, char := range strings.Split(d.startingBlock, "") {
+	currentId := int(-1)
+	cursor := 0
+	for _, char := range strings.Split(d.startingBlock, "") {
 		if file {
 			currentId++
 		}
@@ -59,9 +61,9 @@ func (d *ComplexDisk) BuildDisk() error {
 			return err
 		}
 		if file {
+			d.lookup[currentId] = FileBlock{ID: currentId, startPos: cursor, size: int(num)}
 			for range num {
 				block := FileBlock{ID: currentId}
-				d.lookup[currentId] = FileBlock{ID: currentId, startPos: i, length: int(num)}
 				d.disk = append(d.disk, block)
 			}
 		} else {
@@ -70,6 +72,7 @@ func (d *ComplexDisk) BuildDisk() error {
 				d.disk = append(d.disk, block)
 			}
 		}
+		cursor += int(num)
 		file = !file
 	}
 	return nil
@@ -78,7 +81,7 @@ func (d *ComplexDisk) BuildDisk() error {
 func (d *SimpleDisk) BuildDisk() error {
 
 	file := true
-	currentId := int64(-1)
+	currentId := int(-1)
 	for char := range strings.SplitSeq(d.startingBlock, "") {
 		if file {
 			currentId++
@@ -139,7 +142,29 @@ func (d *SimpleDisk) Sort() {
 	}
 }
 
-func (d *ComplexDisk) Sort()
+func (d *ComplexDisk) Sort() {
+	// Get current file
+	maxId := len(d.lookup) - 1
+	// ID=0 will never be moved
+	for i := maxId; i > 0; i-- {
+		file := d.lookup[i]
+		// Find an empty block of filesize
+		newIdx, err := d.getEmptyBlock(file.startPos, file.size)
+		if err != nil {
+			// If not found, then go to the next file
+			continue
+		}
+		// If found, then update d.disk
+		for i := newIdx; i < newIdx+file.size; i++ {
+			d.disk[i].ID = file.ID
+		}
+		// Remove old file
+		for i := file.startPos; i < file.startPos+file.size; i++ {
+			d.disk[i] = FileBlock{ID: -1}
+		}
+	}
+
+}
 
 func (d *Disk) CalculateChecksum() int64 {
 	total := int64(0)
@@ -147,10 +172,28 @@ func (d *Disk) CalculateChecksum() int64 {
 		if d.disk[i].ID == -1 {
 			continue
 		}
-		calc := int64(i) * r.ID
+		calc := int64(i) * int64(r.ID)
 		total += calc
 	}
 	return total
+}
+
+func (d *ComplexDisk) getEmptyBlock(upToIdx int, size int) (int, error) {
+	count := 0
+	emptyIdx := 0
+	for i := range upToIdx {
+		block := d.disk[i]
+		if block.ID != -1 {
+			count = 0
+			emptyIdx = i + 1
+			continue
+		}
+		count++
+		if count == size {
+			return emptyIdx, nil
+		}
+	}
+	return 0, errors.New("no block available")
 }
 
 func (d *SimpleDisk) getEmptyBlock(fromIdx int) int {
