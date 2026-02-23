@@ -1,16 +1,16 @@
 package main
 
 import (
-	"aoc/day9"
+	"aoc/day10"
 	"fmt"
 )
 
 func main() {
-	output := day9.Main(1)
+	output := day10.Solve(1)
 	fmt.Println("Part1")
 	fmt.Println(output)
 
-	output2 := day9.Main(2)
+	output2 := day10.Solve(2)
 	fmt.Println("Part2")
 	fmt.Println(output2)
 }
