@@ -68,7 +68,7 @@ func (h *Hiker) GetStartingPoints() []Coordinate {
 	return positions
 }
 
-func (h *UniqueHiker) Hike(pos Coordinate, resetPos Coordinate, totalFound int) (int, error) {
+func (h *UniqueHiker) Hike(pos Coordinate, totalFound int) (int, error) {
 	// From point r, c
 	i, err := strconv.ParseInt(h.hikingMap[pos.R][pos.C], 10, 32)
 	if err != nil {
@@ -84,20 +84,16 @@ func (h *UniqueHiker) Hike(pos Coordinate, resetPos Coordinate, totalFound int) 
 	canGoWest := h.isValidDirection(pos, Coordinate{R: pos.R, C: pos.C - 1})
 	canGoEast := h.isValidDirection(pos, Coordinate{R: pos.R, C: pos.C + 1})
 	if canGoNorth {
-		//fmt.Println("can go north")
-		totalFound, err = h.Hike(Coordinate{R: pos.R - 1, C: pos.C}, pos, totalFound)
+		totalFound, err = h.Hike(Coordinate{R: pos.R - 1, C: pos.C}, totalFound)
 	}
 	if canGoSouth {
-		//fmt.Println("can go south")
-		totalFound, err = h.Hike(Coordinate{R: pos.R + 1, C: pos.C}, pos, totalFound)
+		totalFound, err = h.Hike(Coordinate{R: pos.R + 1, C: pos.C}, totalFound)
 	}
 	if canGoWest {
-		//fmt.Println("can go west")
-		totalFound, err = h.Hike(Coordinate{R: pos.R, C: pos.C - 1}, pos, totalFound)
+		totalFound, err = h.Hike(Coordinate{R: pos.R, C: pos.C - 1}, totalFound)
 	}
 	if canGoEast {
-		//fmt.Println("can go east")
-		totalFound, err = h.Hike(Coordinate{R: pos.R, C: pos.C + 1}, pos, totalFound)
+		totalFound, err = h.Hike(Coordinate{R: pos.R, C: pos.C + 1}, totalFound)
 	}
 
 	return totalFound, nil

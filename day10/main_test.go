@@ -102,7 +102,7 @@ func TestHikeExample5(t *testing.T) {
 
 	var score int
 	for _, point := range points {
-		score, _ = hike2.Hike(point, point, 0)
+		score, _ = hike2.Hike(point, 0)
 	}
 	assert.Equal(t, 3, score)
 }
@@ -113,7 +113,7 @@ func TestHikeExample6(t *testing.T) {
 
 	var score int
 	for _, point := range points {
-		score, _ = hike2.Hike(point, point, 0)
+		score, _ = hike2.Hike(point, 0)
 	}
 	assert.Equal(t, 13, score)
 }
@@ -124,7 +124,7 @@ func TestHikeExample7(t *testing.T) {
 
 	var score int
 	for _, point := range points {
-		score, _ = hike2.Hike(point, point, 0)
+		score, _ = hike2.Hike(point, 0)
 	}
 	assert.Equal(t, 227, score)
 }
@@ -135,7 +135,7 @@ func TestHikeExample8(t *testing.T) {
 
 	var totalScore int
 	for _, point := range points {
-		score, _ := hike2.Hike(point, point, 0)
+		score, _ := hike2.Hike(point, 0)
 		totalScore += score
 	}
 	assert.Equal(t, 81, totalScore)

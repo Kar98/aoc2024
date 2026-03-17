@@ -27,7 +27,7 @@ func Solve(part int) int {
 	uniqueHiker := hiker.NewUniqueHiker(input)
 	points := uniqueHiker.GetStartingPoints()
 	for _, point := range points {
-		total, _ := uniqueHiker.Hike(point, point, 0)
+		total, _ := uniqueHiker.Hike(point, 0)
 		score += total
 	}
 
