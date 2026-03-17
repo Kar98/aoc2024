@@ -13,6 +13,10 @@ type Hiker struct {
 	rBbox           int // row bounding box
 }
 
+type UniqueHiker struct {
+	Hiker
+}
+
 type Coordinate struct {
 	R int // row
 	C int // column
@@ -43,6 +47,15 @@ func NewHiker(file string) Hiker {
 	}
 }
 
+func NewUniqueHiker(file string) UniqueHiker {
+	input := FileToInput(file)
+	return UniqueHiker{Hiker{
+		hikingMap: input,
+		cBbox:     len(input[0]) - 1,
+		rBbox:     len(input) - 1,
+	}}
+}
+
 func (h *Hiker) GetStartingPoints() []Coordinate {
 	positions := []Coordinate{}
 	for ri, r := range h.hikingMap {
@@ -55,9 +68,43 @@ func (h *Hiker) GetStartingPoints() []Coordinate {
 	return positions
 }
 
-func (h *Hiker) Hike(position Coordinate, foundHikes []Coordinate) ([]Coordinate, error) {
+func (h *UniqueHiker) Hike(pos Coordinate, resetPos Coordinate, totalFound int) (int, error) {
+	// From point r, c
+	i, err := strconv.ParseInt(h.hikingMap[pos.R][pos.C], 10, 32)
+	if err != nil {
+		panic("could not parse: " + h.hikingMap[pos.R][pos.C])
+	}
+	currentHeight := int(i)
+	if currentHeight == 9 {
+		return totalFound + 1, ErrEnd
+	}
+	// Look at each cardinal direction, find number of valid directions
+	canGoNorth := h.isValidDirection(pos, Coordinate{R: pos.R - 1, C: pos.C})
+	canGoSouth := h.isValidDirection(pos, Coordinate{R: pos.R + 1, C: pos.C})
+	canGoWest := h.isValidDirection(pos, Coordinate{R: pos.R, C: pos.C - 1})
+	canGoEast := h.isValidDirection(pos, Coordinate{R: pos.R, C: pos.C + 1})
+	if canGoNorth {
+		//fmt.Println("can go north")
+		totalFound, err = h.Hike(Coordinate{R: pos.R - 1, C: pos.C}, pos, totalFound)
+	}
+	if canGoSouth {
+		//fmt.Println("can go south")
+		totalFound, err = h.Hike(Coordinate{R: pos.R + 1, C: pos.C}, pos, totalFound)
+	}
+	if canGoWest {
+		//fmt.Println("can go west")
+		totalFound, err = h.Hike(Coordinate{R: pos.R, C: pos.C - 1}, pos, totalFound)
+	}
+	if canGoEast {
+		//fmt.Println("can go east")
+		totalFound, err = h.Hike(Coordinate{R: pos.R, C: pos.C + 1}, pos, totalFound)
+	}
+
+	return totalFound, nil
+}
+
+func (h *Hiker) Hike(pos Coordinate, foundHikes []Coordinate) ([]Coordinate, error) {
 	var currentHeight int
-	pos := position // alias
 	//fmt.Printf("r%d c%d\n", position.R, position.C)
 
 	// From point r, c
@@ -72,10 +119,10 @@ func (h *Hiker) Hike(position Coordinate, foundHikes []Coordinate) ([]Coordinate
 	}
 
 	// Look at each cardinal direction, find number of valid directions
-	canGoNorth := h.isValidDirection(position, Coordinate{R: pos.R - 1, C: pos.C})
-	canGoSouth := h.isValidDirection(position, Coordinate{R: pos.R + 1, C: pos.C})
-	canGoWest := h.isValidDirection(position, Coordinate{R: pos.R, C: pos.C - 1})
-	canGoEast := h.isValidDirection(position, Coordinate{R: pos.R, C: pos.C + 1})
+	canGoNorth := h.isValidDirection(pos, Coordinate{R: pos.R - 1, C: pos.C})
+	canGoSouth := h.isValidDirection(pos, Coordinate{R: pos.R + 1, C: pos.C})
+	canGoWest := h.isValidDirection(pos, Coordinate{R: pos.R, C: pos.C - 1})
+	canGoEast := h.isValidDirection(pos, Coordinate{R: pos.R, C: pos.C + 1})
 	if canGoNorth {
 		//fmt.Println("can go north")
 		foundHikes, err = h.Hike(Coordinate{R: pos.R - 1, C: pos.C}, foundHikes)

@@ -21,6 +21,14 @@ func Solve(part int) int {
 			total = common.GetUniques(endPoints)
 			score += len(total)
 		}
+		return score
+	}
+
+	uniqueHiker := hiker.NewUniqueHiker(input)
+	points := uniqueHiker.GetStartingPoints()
+	for _, point := range points {
+		total, _ := uniqueHiker.Hike(point, point, 0)
+		score += total
 	}
 
 	return score

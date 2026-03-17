@@ -21,6 +21,18 @@ var example3 string
 //go:embed eg4.txt
 var example4 string
 
+//go:embed eg5.txt
+var example5 string
+
+//go:embed eg6.txt
+var example6 string
+
+//go:embed eg7.txt
+var example7 string
+
+//go:embed eg8.txt
+var example8 string
+
 func TestFileToInput(t *testing.T) {
 	file := hiker.FileToInput(example1)
 	assert.Len(t, file, 10)
@@ -82,4 +94,49 @@ func TestHikeExample4(t *testing.T) {
 		score += len(total)
 	}
 	assert.Equal(t, 36, score)
+}
+
+func TestHikeExample5(t *testing.T) {
+	hike2 := hiker.NewUniqueHiker(example5)
+	points := hike2.GetStartingPoints()
+
+	var score int
+	for _, point := range points {
+		score, _ = hike2.Hike(point, point, 0)
+	}
+	assert.Equal(t, 3, score)
+}
+
+func TestHikeExample6(t *testing.T) {
+	hike2 := hiker.NewUniqueHiker(example6)
+	points := hike2.GetStartingPoints()
+
+	var score int
+	for _, point := range points {
+		score, _ = hike2.Hike(point, point, 0)
+	}
+	assert.Equal(t, 13, score)
+}
+
+func TestHikeExample7(t *testing.T) {
+	hike2 := hiker.NewUniqueHiker(example7)
+	points := hike2.GetStartingPoints()
+
+	var score int
+	for _, point := range points {
+		score, _ = hike2.Hike(point, point, 0)
+	}
+	assert.Equal(t, 227, score)
+}
+
+func TestHikeExample8(t *testing.T) {
+	hike2 := hiker.NewUniqueHiker(example8)
+	points := hike2.GetStartingPoints()
+
+	var totalScore int
+	for _, point := range points {
+		score, _ := hike2.Hike(point, point, 0)
+		totalScore += score
+	}
+	assert.Equal(t, 81, totalScore)
 }
